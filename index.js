@@ -25,46 +25,68 @@ function openingSeq() {
 			message: "What would you like to do?",
 			name: "action",
 			choices: [
-				"add employee",
-
-				"update Employee Role",
-				"view All Roles",
-
-				// {
-				//     name: "addRole",
-				//     value: "add_role"
-				// },
-				// {
-				//     name: "viewAllDepartments",
-				//     value: "view_dept"
-				// },
-				"View Department",
-
-				"quit",
+				"View All Employees",
+				"Add Employee",
+				"Update Employee Role",
+				"Update Manager",
+				"View Employees by Manager",
+				"View All Roles",
+				"Add Role",
+				"View All Departments",
+				"View Emplyees by Department",
+				"View Staff Budget",
+				"Delete Departments, Roles, and/or Employees",
+				"Quit"
 			],
 		},
 	]).then((res) => {
 		let action = res.action;
 		switch (action) {
-			case "View Department":
+			case "View All Employees":
+				viewEmployee();
+				break;
+			case "Add Employee":
+				addEmployee();
+				break;
+			case "Update Employee Role":
+				empUpdate();
+				break;
+			case "Update Manager":
+				manaUpdate();
+				break;
+			case "View All Roles":
+				viewRole();
+				break;
+			case "Add Role":
+				addRole();
+				break;
+			case "View All Departments":
 				viewDepartment();
 				break;
-				case 'view All Roles':
-				viewallRoles();
+			case "View Employees by Department":
+				viewempDept();
 				break;
-			// case "add_employee":
-			// 	addEmployee();
-			// 	break;
-			// case "up_emp_role":
-			// 	empUpdate();
-			// 	break;
-			// case "add_role":
-			// 	addRole();
-			// 	break;
-			//case "add_dept";
+			case "Delete Departments, Roles, and/or Employees":
+				deleteEntry();
+				break;
+			case "Quit":
+				db.end();
+				break;
 		}
 	});
 }
+
+function viewEmployee() {
+	db.query(
+		"SELECT employee.id AS 'Emp ID', employee.first_name AS 'First Name', employee.last_name AS 'Last Name', role.title AS 'Job Title', department.name AS 'Department', role.salary AS 'Salary', CONCAT (manager.first_name, ' ', manager.last_name) AS 'Manager' FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON department.id = role.department_id LEFT JOIN employees AS manager ON employees.manager = manager.id;",
+		(err, res) => {
+			console.table(res);
+			console.log("-------------------");
+			openingSeq();
+		}
+	);
+}
+
 
 function addEmployee() {
 	prompt([
@@ -90,7 +112,7 @@ function addEmployee() {
 				"Account Manager",
 				"Accountant",
 				"Legal Team Lead",
-				"Lawyer", //How to make dynamic, how to add more items to the list without manually creating one.
+				"Lawyer" 
 			],
 		},
 		{
@@ -100,6 +122,61 @@ function addEmployee() {
 		},
 	]).then((res) => {});
 }
+
+
+function empUpdate() {
+	prompt([
+		{
+			type: "input",
+			message: "Which employee's role do you want to update?",
+			name: " empUpdate",
+		},
+		{
+			type: "list",
+			message: "Which role do you want to assign the selected employees?",
+			name: "empNrole",
+			choices: [
+				"Sales Lead",
+				"Salesperson",
+				"Lead Engineer",
+				"Software Engineer",
+				"Account Manager",
+				"Accountant",
+				"Legal Team Lead",
+				"Lawyer"
+			],
+		},
+		{
+			type: "input",
+			message: "Who is the manager of the selected employees?",
+			name: "empManager",
+		},
+	]).then((res) => []);
+}
+
+function manaUpdate(){
+
+}
+
+
+function viewRole() {
+	db.query(
+		"SELECT role.title AS 'Job Title', role.id AS 'Job ID', department.name AS 'Department', role.salary AS 'Salary' FROM role LEFT JOIN department ON role.department_id = department.id;",
+		(err, res) => {
+			console.table(res);
+			console.log("----------------------");
+			openingSeq();
+		}
+	);
+}
+
+
+
+
+
+
+
+
 
 function addRole() {
 	prompt([
@@ -122,54 +199,51 @@ function addRole() {
 			type: "checkbox",
 			message: "Which department does the role belong to?",
 			name: "deptRole",
-			choices: ["Sales", "Legal", "Finance", "Engineering"],
+			choices: [
+				"Sales",
+				"Legal",
+				"Finance",
+				"Engineering",
+			],
 		},
 	]).then((res) => []);
 }
 
-function empUpdate() {
-	prompt([
-		{
-			type: "input",
-			message: "Which employee's role do you want to update?",
-			name: " empUpdate",
-		},
-		{
-			type: "list",
-			message: "Which role do you want to assign the selected employees?",
-			name: "empNrole",
-			choices: [
-				"Sales Lead",
-				"Salesperson",
-				"Lead Engineer",
-				"Software Engineer",
-				"Account Manager",
-				"Accountant",
-				"Legal Team Lead",
-				"Lawyer",
-			],
-		},
-		{
-			type: "input",
-			message: "Who is the manager of the selected employees?",
-			name: "empManager",
-		},
-	]).then((res) => []);
-}
+
 
 function viewDepartment(){
     db.query('SELECT * FROM department;', (err, res)=> {
-
         console.table(res)
 		console.log('-----------');
         openingSeq();
     })
 }
 
-function viewallRoles(){
-	db.query("SELECT role.title, role.id, department.name, role.salary FROM role LEFT JOIN department ON role.department_id = department.id;" , (err, res) => {
-		console.table(res);
-		console.log("-----------");
-		openingSeq();
-	});
+function viewempDept(){
+	db.query(
+		"SELECT department.name AS 'Department', CONCAT (employee.first_name, ' ', employee.last_name) AS 'Employee Name', employee FROM department LEFT JOIN;", (err, res)=> {
+        console.table(res)
+		console.log('-----------');
+        openingSeq();
+    })
+}
+
+function deleteEntry(){
+	prompt([
+		{
+			type: "list",
+			message: "What are you deleting from?",
+			name: "delEntry",
+			choices: [
+				"Departments",
+				"Roles",
+				"Employees"
+			],
+		},
+	]).then((res) => {
+		let delEntry = res.delEntry;
+		switch (delEntry){
+
+		}
+	})
 }
